@@ -163,6 +163,13 @@ public class EmbeddableCDIProducer
 
     @Produces
     @Default
+    public ObjectMapper getCoreObjectMapper()
+    {
+        return objectMapper;
+    }
+
+    @Produces
+    @Default
     public GlobalHttpConfiguration getGlobalHttpConfiguration()
     {
         return globalHttpConfiguration;

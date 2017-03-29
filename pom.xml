@@ -44,8 +44,8 @@
     <projectOwner>Red Hat, Inc.</projectOwner>
     <javaVersion>1.8</javaVersion>
 
-    <atlasVersion>0.17.0</atlasVersion>
-    <galleyVersion>0.13.6-SNAPSHOT</galleyVersion>
+    <atlasVersion>0.17.1-SNAPSHOT</atlasVersion>
+    <galleyVersion>0.14.0-SNAPSHOT</galleyVersion>
     <partylineVersion>1.9.2</partylineVersion>
 
     <propulsorVersion>1.2</propulsorVersion>
@@ -187,11 +187,6 @@
       <dependency>
         <groupId>org.commonjava.maven.atlas</groupId>
         <artifactId>atlas-bindings-jackson-identities</artifactId>
-        <version>${atlasVersion}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.commonjava.maven.atlas</groupId>
-        <artifactId>atlas-bindings-jackson-relationships</artifactId>
         <version>${atlasVersion}</version>
       </dependency>
 

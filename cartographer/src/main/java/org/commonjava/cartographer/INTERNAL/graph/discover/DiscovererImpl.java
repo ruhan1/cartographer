@@ -15,6 +15,8 @@
  */
 package org.commonjava.cartographer.INTERNAL.graph.discover;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.commonjava.cartographer.CartoDataException;
 import org.commonjava.cartographer.graph.discover.DiscoveryConfig;
 import org.commonjava.cartographer.graph.discover.DiscoveryResult;
@@ -34,11 +36,15 @@ import org.commonjava.maven.galley.maven.parse.MavenPomReader;
 import org.commonjava.maven.galley.maven.rel.MavenModelProcessor;
 import org.commonjava.maven.galley.model.Location;
 import org.commonjava.maven.galley.model.Transfer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Alternative;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,6 +70,9 @@ public class DiscovererImpl
 
     @Inject
     private MavenPomReader pomReader;
+
+    @Inject
+    private ObjectMapper objectMapper;
 
     protected DiscovererImpl()
     {
@@ -115,6 +124,44 @@ public class DiscovererImpl
 
         final List<? extends Location> locations = discoveryConfig.getLocations();
 
+        DiscoveryResult result = null;
+
+        Transfer transfer = null;
+        try
+        {
+            transfer = artifactManager.retrieveFirst( locations, specific.asPomArtifact() );
+        }
+        catch ( TransferException e )
+        {
+            throw new CartoDataException( "Failed to retrieve POM: {} from: {}. Reason: {}", e, specific, locations,
+                                          e.getMessage() );
+        }
+
+        if ( transfer != null && transfer.exists() )
+        {
+            final String REL_SUFFIX = ".rel";
+
+            Transfer relTransfer = transfer.getSibling( REL_SUFFIX );
+            if ( relTransfer != null && relTransfer.exists() )
+            {
+                try (InputStream in = relTransfer.openInputStream())
+                {
+                    String rel = IOUtils.toString( in );
+                    final Logger logger = LoggerFactory.getLogger( getClass() );
+                    logger.debug( "Rel: " + rel );
+                    EProjectDirectRelationships rels = objectMapper.readValue( rel, EProjectDirectRelationships.class );
+                    result = new DiscoveryResult( discoveryConfig.getDiscoverySource(), specific,
+                                                  rels.getExactAllRelationships() );
+                }
+                catch ( IOException e )
+                {
+                    throw new CartoDataException( "Failed to read Rel: {} from: {}. Reason: {}", e, specific, locations,
+                                                  e.getMessage() );
+                }
+            }
+        }
+
+        /*
         Transfer transfer;
         final MavenPomView pomView;
         try
@@ -181,6 +228,7 @@ public class DiscovererImpl
                 result = new DiscoveryResult( result.getSource(), result, rejected );
             }
         }
+        */
 
         return result;
     }

@@ -55,7 +55,7 @@
     </dependency>
     <dependency>
       <groupId>org.commonjava.maven.atlas</groupId>
-      <artifactId>atlas-bindings-jackson-relationships</artifactId>
+      <artifactId>atlas-relationships-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.commonjava.cartographer</groupId>
